@@ -1,0 +1,138 @@
+%\VignetteIndexEntry{Processed human microRNA-overexpression data from GEO, and sequence information from TargetScan, and targetScore from TargetScore}
+
+\documentclass[12pt]{article}
+
+\usepackage[left=1in,top=1in,right=1in, bottom=1in]{geometry}
+
+\usepackage{Sweave}
+\usepackage{times}
+\usepackage{hyperref}
+\usepackage{subfig}
+\usepackage{natbib}
+\usepackage{graphicx}
+
+
+\hypersetup{ 
+colorlinks,
+citecolor=black,
+filecolor=black, 
+linkcolor=black, 
+urlcolor=black 
+}
+
+
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\Rmethod}[1]{{\texttt{#1}}}
+\newcommand{\Rfunarg}[1]{{\texttt{#1}}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+\newcommand{\Rcode}[1]{{\texttt{#1}}}
+
+\newcommand{\SD}{Supplementary Data}
+
+\newcommand{\software}[1]{\textsf{#1}}
+\newcommand{\R}{\textsf{R}}
+
+\newcommand{\TopHat}{\software{TopHat}}
+\newcommand{\Bowtie}{\software{Bowtie}}
+
+\bibliographystyle{plainnat}
+
+\title{Processed human microRNA-overexpression data from GEO, and sequence information from TargetScan, and targetScore from TargetScore}
+\author{Yue Li \\ \texttt{yueli@cs.toronto.edu}}
+\date{\today}
+
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\maketitle
+
+\section{MicroRNA perturbation datasets}
+We collected 84 Gene Expression Omnibus (GEO) series corresponding to 6 platforms, 77 human cells or tissues, and 112 distinct miRNAs. To our knowledge, this is by far the largest miRNA-overexpression data compendium. To automate the data download and processing, we developed a pipeline written in R, making use of the function \texttt{getGEO} from \emph{GEOquery} R/Bioconductor package (\cite{Davis:2007fc}). For each dataset, the pipeline downloads the raw or processed data (if available) and calculates (when necessary) the log fold-change (logFC) in treatment (miRNA transfected) vs (mock) control, taking into account the unique properties of each data. Next, we combined all of the logFC data columns into a single $N \times M$ matrix for all of the $N = 19177$ RefSeq mRNAs (NM\_*  obtained from UCSC) and $M = 286$ datasets. Missing data (logFC) for some genes across studies were imputed using \texttt{impute.knn} from \emph{impute} R package (\cite{Troyanskaya:2001uh}). For miRNA transfection data having multiple measurements (in different studies), we picked the one whose logFC correlate the most with the validated targets from mirTarBase \cite{Hsu:2011ed} or average them if no validated target available.
+
+<<miRNA_transfection_data, eval=TRUE>>=
+library(TargetScoreData)
+
+transfection_data <- get_miRNA_transfection_data()$transfection_data
+
+datasummary <- 
+list(  `MicroRNA` = table(names(transfection_data)),
+		`GEO Series` = table(sapply(transfection_data, function(df) df$Series[1])),
+		`Platform` = table(sapply(transfection_data, function(df) df$platform[1])),
+		`Cell/Tissue` = table(sapply(transfection_data, function(df) df$cell[1])))		
+
+print(lapply(datasummary, length))
+@
+
+
+\section{TargetScan context score and PCT}
+TargetScan context score and PCT for all of the predicted sites (including conserved and nonconserved sites) downloaded from TargetScan website (\url{http://www.targetscan.org/cgi-bin/targetscan/data_download.cgi?db=vert_61})
+
+
+<<targetScan, eval=TRUE>>=
+
+targetScanCS <- get_TargetScanHuman_contextScore()
+
+targetScanPCT <- get_TargetScanHuman_PCT()
+
+head(targetScanCS)
+
+dim(targetScanCS)
+
+head(targetScanPCT)
+
+dim(targetScanPCT)
+@
+
+\section{TargetScore}
+Encouraged by the superior performance of TargetScore (manuscript in peer-review), we applied TargetScore to all of the transfection data above. For further exploring miRNA targetome and their associations, we enclose the targetScores results in this package.
+
+
+<<targetScore, eval=TRUE>>=
+targetScoreMatrix <- get_precomputed_targetScores()
+
+head(names(targetScoreMatrix))
+
+head(targetScoreMatrix[[1]])
+@
+
+We can reproduce targetScores using the above data as demonstrated in the following example (require \Rpackage{TargetScore} package). As a convenience function, we applied a wrapper function called \texttt{getTargetScores} that does the following: (1) given a miRNA ID, obtain fold-change(s) from logFC.imputed matrix or use the user-supplied fold-changes; (2) retrives TargetScan context score (CS) and PCT (if found); (3) obtain validated targets from the local mirTarBase file; (4) compute targetScore. We apply \texttt{getTargetScores} function using miRNA hsa-miR-1, which we know has all three types of data, namely logFC, targetScan context score, and PCT.
+
+<<getTargetScores demo, eval=FALSE>>=
+library(TargetScore)
+library(gplots)
+
+myTargetScores <- getTargetScores("hsa-miR-1", tol=1e-3, maxiter=200)
+
+table((myTargetScores$targetScore > 0.1), myTargetScores$validated) # a very lenient cutoff
+
+# obtain all of targetScore for all of the 112 miRNA
+
+logFC.imputed <- get_precomputed_logFC()
+
+mirIDs <- unique(colnames(logFC.imputed))
+
+# takes time
+
+# targetScoreMatrix <- mclapply(mirIDs, getTargetScores)
+
+# names(targetScoreMatrix) <- mirIDs
+@
+
+
+
+
+
+\section{Session Info}
+<<sessi>>=
+sessionInfo()
+@
+
+
+
+
+\bibliography{TargetScoreData}
+\end{document}
