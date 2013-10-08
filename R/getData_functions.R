@@ -43,13 +43,13 @@ get_precomputed_targetScores <- function(datapath=system.file("extdata/targetSco
 
 
 # We combined all of the logFC data columns into a single N x M matrix for all of the N = 19177 RefSeq mRNAs (NM_*  obtained from UCSC) and M = 286 datasets. Missing data (logFC) for some genes across studies were imputed using \code{impute} from \code{impute.knn}.
-get_precomputed_logFC <- function(datapath=system.file("extdata/logFC.imputed.RData", package = "TargetScoreData")) {
+get_precomputed_logFC <- function(datapath=system.file("extdata/logFC.RData", package = "TargetScoreData")) {
 			
-	logFC.imputed <- NULL
+	logFC <- NULL
 	
 	load(datapath)
 	
-	logFC.imputed
+	logFC
 }
 
 

@@ -6,13 +6,13 @@
 Processed human microRNA perturbation data from GEO, and sequence information from TargetScan, and targetScore from TargetScore
 }
 \description{
-To automate the pipeline of calculating targetScore using \code{\link[TargetScore]{targetScore}}, we compiled, processed and generated miRNA-overexpression fold-changes from 84 Gene Expression Omnibus (GEO) series corresponding to 6 platforms, 77 human cells or tissues, and 112 distinct miRNAs. To our knowledge, this is by far the largest miRNA-pertubation data compendium. Accompanied with the data, we also included in this package the sequence feature scores from TargetScanHuman 6.1 including the context+ score and the probabilities of conserved targeting for each miRNA-mRNA interaction. Thus, the user can use these static sequence-based scores together with user-supplied tissue/cell-specific fold-change due to miRNA overexpression to predict miRNA targets using \code{\link[TargetScore]{targetScore}}.
+To automate the pipeline of calculating targetScore using \code{\link[TargetScore]{targetScore}}, we compiled, processed and generated miRNA-overexpression fold-changes from 84 Gene Expression Omnibus (GEO) series corresponding to 6 platforms, 77 human cells or tissues, and 113 distinct miRNAs. To our knowledge, this is by far the largest miRNA-pertubation data compendium. Accompanied with the data, we also included in this package the sequence feature scores from TargetScanHuman 6.1 including the context+ score and the probabilities of conserved targeting for each miRNA-mRNA interaction. Thus, the user can use these static sequence-based scores together with user-supplied tissue/cell-specific fold-change due to miRNA overexpression to predict miRNA targets using \code{\link[TargetScore]{targetScore}}.
 }
 \details{
 \tabular{ll}{
 Package: \tab TargetScoreData\cr
 Type: \tab Package\cr
-Version: \tab 0.99.2\cr
+Version: \tab 0.99.4\cr
 Date: \tab 2013-07-13\cr
 License: \tab GPL-2\cr
 }
